@@ -17,7 +17,6 @@ bool exitTriggered = false;
 unsigned long detectionTime = 0;
 const unsigned long returnDelay = 5000;
 
-// Time tracking variables
 unsigned long spot1EntryTime = 0;
 unsigned long spot2EntryTime = 0;
 bool spot1WasOccupied = false;
@@ -50,7 +49,6 @@ void loop() {
   bool spot2Occupied = (digitalRead(spot2Sensor) == LOW);
   bool parkingFull = spot1Occupied && spot2Occupied;
 
-  // Track when spots become occupied
   if (spot1Occupied && !spot1WasOccupied) {
     spot1EntryTime = millis();
     spot1WasOccupied = true;
@@ -60,15 +58,13 @@ void loop() {
     spot2WasOccupied = true;
   }
 
-  // ENTRY detection - ONLY opens if parking available
   if (entryDetected && !isGateOpen) {
     if (!parkingFull) {
       myServo.write(90);
       isGateOpen = true;
       entryTriggered = true;
       detectionTime = millis();
-      
-      // Show available spots
+
       if (!spot1Occupied) {
         showLcdMessage("Welcome!", "Spot 1 free");
       } else {
@@ -80,14 +76,12 @@ void loop() {
     delay(300);
   }
 
-  // EXIT detection - works normally (always opens)
   if (exitDetected && !isGateOpen) {
     myServo.write(90);
     isGateOpen = true;
     exitTriggered = true;
     detectionTime = millis();
     
-    // Check which spot was just vacated
     if (spot1WasOccupied && !spot1Occupied) {
       unsigned long parkingDuration = (millis() - spot1EntryTime) / 1000; // in seconds
       displayExitMessage(parkingDuration);
@@ -104,7 +98,6 @@ void loop() {
     delay(300);
   }
 
-  // Closing logic remains exactly the same
   if ((entryTriggered && exitDetected && isGateOpen) || 
       (exitTriggered && entryDetected && isGateOpen)) {
     delay(500);
@@ -116,7 +109,6 @@ void loop() {
     delay(300);
   }
 
-  // Auto-close timeout
   if (isGateOpen && (millis() - detectionTime > returnDelay)) {
     myServo.write(0);
     isGateOpen = false;
@@ -137,7 +129,6 @@ void displayExitMessage(unsigned long durationSec) {
   lcd.setCursor(0, 1);
   lcd.print("TIME: ");
   
-  // Convert seconds to hours, minutes, seconds
   unsigned long hours = durationSec / 3600;
   unsigned long minutes = (durationSec % 3600) / 60;
   unsigned long seconds = durationSec % 60;
