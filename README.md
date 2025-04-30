@@ -80,4 +80,4 @@ The Arduino code handles:
 
 ---
 
-Thamk you!
+Thank you!
